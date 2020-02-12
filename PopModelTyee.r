@@ -3,8 +3,8 @@ source("code/functions.r")
 ### Parameters ###
 ##################
 
-n <- 10 # rows per age class - different threads of stochasticity
-z <- 50 # number of matrices - years into future
+n <- 100 # rows per age class - different threads of stochasticity
+z <- 100 # number of matrices - years into future
 Sex <- .5 # proportion of females - natural population
 YYS <- .18 # YY survival from age 0 to spawn
 YYN <- 3000
@@ -23,13 +23,19 @@ ST <- cbind(stF,stM,stYY,NA,NA,NA,NA,NA)
 S <- c(.425,.75,.035,.425,.75,.035,.18,.18,.18)
 SYY <- c(.18,.18,.18)
 Fc <- c(mF[1,])
+###################
+### Suppression ###
+###################
+# sup <- c(.2,.2,.2)
+sup <- c(.5,.4,.3) # vector == proprtion of fish suppressed, age 0 ,1, and 2
+# sup <- c(.3,.5,.4) # vector == proprtion of fish suppressed, age 0 ,1, and 2
+sdd <- .024 # standard deviation of suppression rates
+# sapply(1 - sup,function(x) rbeta(n,beta.mom(x,sdd)[1],beta.mom(x,sdd)[2]))
+CE <- function(x,top = .03,b) (1-exp(-b*x))*top # capture efficiency as a f() of abundance
+SuppressionRateDecay <- .5 # try b = 0.1, .03,.008, .001, and .0005
+curve(CE(x,top = .3,SuppressionRateDecay),0,1000,lwd = 3)
 
-# Try this again with stoch atart
-out <- array(0,dim = c(n,9,z),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z))) #,"Fn","Mn","YYn","N","Sex"
-out[,,1] <- cbind(stF,stM,stYY)
-# Add Stoch
-out[,c(1,4),1] <- apply(out[,c(1,4),1],2,rpois,n=n)
-out[,1:6,1] <- round(f_suppress(out[,1:6,1],sdd,n = n,sup = sup) * out[,1:6,1])
+
 
 
 #
@@ -43,8 +49,8 @@ out[,1:6,1] <- round(f_suppress(out[,1:6,1],sdd,n = n,sup = sup) * out[,1:6,1])
 st <- out[,1:9,1]
 YYS <- SYY
 
-f <- function(st,n,S,Fc,YYS){
-  # Matrix Math w/ stochasticity
+f <- function(st,n,S,Fc,YYS,sup,sdd){
+  # Matrix Math w/ stochasticity & YY male surv from stock to spawn
   a <- sapply(1:n,function(x) rpois(1,Fc %*% st[x,1:3]))
   a2 <- t(sapply(1:nrow(st),function(x) matrix(rbinom(9,st[x,1:9],prob = S),1,9,byrow = T)))
   M <- cbind(a,a2[,1],apply(a2[,2:3],1,sum),0,a2[,4],apply(a2[,5:6],1,sum),a2[,7],a2[,8],a2[,9]) # apply(a2[,8:9],1,sum)
@@ -57,24 +63,80 @@ f <- function(st,n,S,Fc,YYS){
   tmp <- rhyper(nn = n,m = m,n = ni,k = k)# Number of YY males contributing (hypergeometric = similar to binomial, but withM replacement)
   YYcont <- tmp/apply(M[,c("F1","Fad")],1,sum) # YY male contribution to eggs
   YYcont[!is.finite(YYcont)] <- 0# deal with nans (from 0/0)
-  # M[,"YY0",i+1] <- stYY[,1] # Add YY males
   M[,"F0"] <- M[,"F0"] - round(YYcont*M[,"F0"]) # Take YY male progeny from F0
   M[,"M0"] <- M[,"M0"] + round(YYcont*M[,"F0"]) # Add to M0
   male0 <- round(M[,"F0"]/2) # natural Parents - male
   M[,"M0"] <- M[,"M0"] + male0
   M[,"F0"] <- M[,"F0"] - male0
   # Suppress
-  M[,1:6] <- round(f_suppress(M[,1:6],sdd,n = n,sup = sup) * M[,1:6])
-  # # Add YY males
-  # M[,"YY0"] <- YYN
-  # YY surv to spawn and stocking
-  # a3 <- t(sapply(1:nrow(M),function(x) matrix(rbinom(3,c(M[x,7:9]),prob = YYS),1,3,byrow = T)))
+  tmp <- beta.mom(1 - t(CE(x = t(M[,1:6]),top =rep(sup,2),b = SuppressionRateDecay)),sdd)
+  tmp[[1]][tmp[[1]] < 0] <- 0; tmp[[2]][tmp[[1]] < 0] <- 0
+  tmp <- matrix(mapply(rbeta,"n" = 1,"shape1" = tmp[[1]],"shape2" = tmp[[2]]),n,6)
+  M[,1:6] <- round(tmp * M[,1:6])
   M[,7:9] <- cbind(YYN,M[,7],apply(M[,8:9],1,sum))
   M[M < 0] <- 0
   M
 }
 
-for(j in 1:(z-1)) out[,,j+1] <- f(st = out[,,j],n = n,S = S,Fc = Fc, YYS = SYY)
+out <- array(0,dim = c(n,9,z),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z))) #,"Fn","Mn","YYn","N","Sex"
+out[,,1] <- cbind(stF,stM,stYY)
+# Add Stoch
+out[,c(1,4),1] <- apply(out[,c(1,4),1],2,rpois,n=n)
+out[,1:6,1] <- round(f_suppress(out[,1:6,1],sdd,n = n,sup = sup) * out[,1:6,1])
 
-out[,,3] <- f(out[,,2],n,S,Fc,YYS)
-st <- out[,,2]
+for(k in 1:(z-1)) out[,,k+1] <- f(st = out[,,k],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup,sdd = sdd)
+
+# out[,,3] <- f(out[,,2],n,S,Fc,YYS)
+# st <- out[,,2]
+
+#############
+### plots ###
+#############
+dim(out)
+tots <- apply(out[,1:3,],c(1,3),sum)
+erad <- sapply(1:nrow(tots),function(x) which(tots[x,] == 0)[1L]) - 1
+any(is.na(erad)) # if true the z not big enough
+hist(erad)
+median(erad)
+min(erad)
+# barplot(tots,beside = T)
+asd <- apply(tots,2,median)
+plot(1:z,asd,type = "l",xlim = c(1,25),ylim = c(0,2000),xaxs = "i")
+invisible(sapply(1:n,function(x) lines(1:z,tots[x,])))
+lines(1:z,asd,col = "red",lwd = 2)
+abline(h = 0,lty = 2)
+
+########################
+### Sensitivity Anal ###
+########################
+# One way
+sup1 <- seq(.05,.95,.05)
+sup <- rep(seq(.05,.95,.05),each = 3)
+sup <- split(sup,rep(1:(57/3),each = 3))
+#
+out <- array(0,dim = c(n,9,z,length(sup)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),sup1)) #,"Fn","Mn","YYn","N","Sex"
+dim(out);dimnames(out)
+out[,,1,] <- cbind(stF,stM,stYY)
+for(ii in seq_along(sup)) out[,1:6,1,ii] <-round(f_suppress(mat = out[,1:6,1,ii],sdd=sdd,n = n,sup = sup[[ii]]) * out[,1:6,1,ii])
+for(ii in seq_along(sup)){
+for(k in 1:(z-1)) out[,,k+1,ii] <- f(st = out[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup[[ii]],sdd = sdd)
+}
+out[,,1,1]
+out[,,100,19]
+out[,,100,]
+
+tots <- apply(out[,1:3,,],c(1,3,4),sum)
+tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
+apply(tots2,2,median)
+
+# two-way suppression -- later
+asd <- seq(.1,.9,.1)
+asd <- expand.grid(asd,asd,asd)
+asd <- asplit(asd,1)
+nrow(asd)
+# Starting point
+out <- array(0,dim = c(n,9,z,nrow(asd)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z))) #,"Fn","Mn","YYn","N","Sex"
+out[,,1,] <- cbind(stF,stM,stYY)
+for(i in 1:nrow(asd)) out[,1:6,1,i] <-round(f_suppress(mat = out[,1:6,1,i],sdd=sdd,n = n,sup = as.vector(asd[[i]])) * out[,1:6,1,i])
+
+out[,,1,300]
