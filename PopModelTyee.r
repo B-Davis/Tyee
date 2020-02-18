@@ -15,10 +15,10 @@ mM <- matrix(c(0,.425,0,0,0,.75,0,0,.035),ncol = 3) # Male survival matrix
 mF <- matrix(c(0,.425,0,3,0,.75,4.6,0,.035),ncol = 3) # Female
 mYY <- matrix(c(0,.18,0,0,0,.25,0,0,.09),ncol = 3)
 st <- c(3000,2000,1000) # Starting abundance - 0,1,ad
-stF <- matrix(rep(c(3000,2000,1000)/2,n,each = n),n,3)
-stM <- matrix(rep(c(3000,2000,1000)/2,n,each = n),n,3)
-# stYY <- cbind(rbinom(n = n,size = YYN,prob = YYS),0,0) # Starting abundance - 0,1,ad
-stYY <- cbind(rep(YYN,n),0,0) # Starting abundance - 0,1,ad
+# stF <- matrix(rep(c(3000,2000,1000)/2,n,each = n),n,3)
+# stM <- matrix(rep(c(3000,2000,1000)/2,n,each = n),n,3)
+# # stYY <- cbind(rbinom(n = n,size = YYN,prob = YYS),0,0) # Starting abundance - 0,1,ad
+# stYY <- cbind(rep(YYN,n),0,0) # Starting abundance - 0,1,ad
 ST <- cbind(stF,stM,stYY,NA,NA,NA,NA,NA)
 S <- c(.425,.75,.035,.425,.75,.035,.18,.18,.18)
 SYY <- c(.18,.18,.18)
@@ -33,7 +33,7 @@ sdd <- .024 # standard deviation of suppression rates
 # sapply(1 - sup,function(x) rbeta(n,beta.mom(x,sdd)[1],beta.mom(x,sdd)[2]))
 CE <- function(x,top = .03,b) (1-exp(-b*x))*top # capture efficiency as a f() of abundance
 SuppressionRateDecay <- .5 # try b = 0.1, .03,.008, .001, and .0005
-curve(CE(x,top = .3,SuppressionRateDecay),0,1000,lwd = 3)
+# curve(CE(x,top = .3,SuppressionRateDecay),0,1000,lwd = 3)
 
 
 
@@ -49,7 +49,7 @@ curve(CE(x,top = .3,SuppressionRateDecay),0,1000,lwd = 3)
 st <- out[,1:9,1]
 YYS <- SYY
 
-f <- function(st,n,S,Fc,YYS,sup,sdd){
+f <- function(st,n,S,Fc,YYS,sup,sdd,YYN){ # starting pop - n columns - survival rates - Fecundity - YY surv. rates - suppression rates - sd of sup. rates
   # Matrix Math w/ stochasticity & YY male surv from stock to spawn
   a <- sapply(1:n,function(x) rpois(1,Fc %*% st[x,1:3]))
   a2 <- t(sapply(1:nrow(st),function(x) matrix(rbinom(9,st[x,1:9],prob = S),1,9,byrow = T)))
@@ -79,12 +79,12 @@ f <- function(st,n,S,Fc,YYS,sup,sdd){
 }
 
 out <- array(0,dim = c(n,9,z),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z))) #,"Fn","Mn","YYn","N","Sex"
-out[,,1] <- cbind(stF,stM,stYY)
+out[,,1] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(YYN,n),0,0))
 # Add Stoch
 out[,c(1,4),1] <- apply(out[,c(1,4),1],2,rpois,n=n)
 out[,1:6,1] <- round(f_suppress(out[,1:6,1],sdd,n = n,sup = sup) * out[,1:6,1])
 
-for(k in 1:(z-1)) out[,,k+1] <- f(st = out[,,k],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup,sdd = sdd)
+for(k in 1:(z-1)) out[,,k+1] <- f(st = out[,,k],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup,sdd = sdd,YYN = YYN)
 
 # out[,,3] <- f(out[,,2],n,S,Fc,YYS)
 # st <- out[,,2]
@@ -109,26 +109,51 @@ abline(h = 0,lty = 2)
 ########################
 ### Sensitivity Anal ###
 ########################
-# One way
-sup1 <- seq(.05,.95,.05)
-sup <- rep(seq(.05,.95,.05),each = 3)
-sup <- split(sup,rep(1:(57/3),each = 3))
+# One way - by parapmer
+# Suppression
+tmp1 <- seq(.05,.95,.02)
+tmp <- rep(sup1,each = 3)
+tmp <- split(sup,rep(1:length(sup1),each = 3))
 #
-out <- array(0,dim = c(n,9,z,length(sup)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),sup1)) #,"Fn","Mn","YYn","N","Sex"
+out <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp1)) #,"Fn","Mn","YYn","N","Sex"
 dim(out);dimnames(out)
-out[,,1,] <- cbind(stF,stM,stYY)
-for(ii in seq_along(sup)) out[,1:6,1,ii] <-round(f_suppress(mat = out[,1:6,1,ii],sdd=sdd,n = n,sup = sup[[ii]]) * out[,1:6,1,ii])
+
+out[,,1,] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(YYN,n),0,0))
+for(ii in seq_along(sup)) out[,1:6,1,ii] <-round(f_suppress(mat = out[,1:6,1,ii],sdd=sdd,n = n,sup = tmp[[ii]]) * out[,1:6,1,ii])
 for(ii in seq_along(sup)){
-for(k in 1:(z-1)) out[,,k+1,ii] <- f(st = out[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup[[ii]],sdd = sdd)
+for(k in 1:(z-1)) out[,,k+1,ii] <- f(st = out[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = tmp[[ii]],sdd = sdd,YYN = YYN)
 }
 out[,,1,1]
 out[,,100,19]
 out[,,100,]
 
+# output
 tots <- apply(out[,1:3,,],c(1,3,4),sum)
 tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
-apply(tots2,2,median)
+aa <- apply(tots2,2,median)
+range(aa)
+plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,1),type = "l",las = 2)
+axis(1,seq(0,1,.1))
 
+# Stocking
+tmp <- seq(500,7000,100)
+#
+outStock <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp)) #,"Fn","Mn","YYn","N","Sex"
+dim(out);dimnames(out)
+for(ii in seq_along(tmp)) outStock[,,1,ii] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(tmp[ii],n),0,0))
+for(ii in seq_along(tmp)) outStock[,1:6,1,ii] <-round(f_suppress(mat = outStock[,1:6,1,ii],sdd=sdd,n = n,sup = sup) * outStock[,1:6,1,ii])
+for(ii in 1:length(tmp)){
+  for(k in 1:(z-1)) outStock[,,k+1,ii] <- f(st = outStock[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup,sdd = sdd,YYN = tmp[ii])
+}
+
+outStock[,,100,19]
+# output
+tots <- apply(outStock[,1:3,,],c(1,3,4),sum)
+tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
+aa <- apply(tots2,2,median)
+range(aa)
+plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,1),type = "l",las = 2)
+axis(1,seq(0,1,.1))
 # two-way suppression -- later
 asd <- seq(.1,.9,.1)
 asd <- expand.grid(asd,asd,asd)
@@ -138,5 +163,3 @@ nrow(asd)
 out <- array(0,dim = c(n,9,z,nrow(asd)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z))) #,"Fn","Mn","YYn","N","Sex"
 out[,,1,] <- cbind(stF,stM,stYY)
 for(i in 1:nrow(asd)) out[,1:6,1,i] <-round(f_suppress(mat = out[,1:6,1,i],sdd=sdd,n = n,sup = as.vector(asd[[i]])) * out[,1:6,1,i])
-
-out[,,1,300]
