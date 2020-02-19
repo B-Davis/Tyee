@@ -109,34 +109,35 @@ abline(h = 0,lty = 2)
 ########################
 ### Sensitivity Anal ###
 ########################
-# One way - by parapmer
-# Suppression
-tmp1 <- seq(.05,.95,.02)
-tmp <- rep(sup1,each = 3)
-tmp <- split(sup,rep(1:length(sup1),each = 3))
+#### One way - Suppression ###
+tmp1 <- seq(.05,.95,length.out = 60)
+tmp <- rep(tmp1,each = 3)
+tmp <- split(tmp,rep(1:length(tmp1),each = 3))
 #
-out <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp1)) #,"Fn","Mn","YYn","N","Sex"
-dim(out);dimnames(out)
+outSup <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp1)) #,"Fn","Mn","YYn","N","Sex"
+dim(outSup);dimnames(outSup)
 
-out[,,1,] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(YYN,n),0,0))
-for(ii in seq_along(sup)) out[,1:6,1,ii] <-round(f_suppress(mat = out[,1:6,1,ii],sdd=sdd,n = n,sup = tmp[[ii]]) * out[,1:6,1,ii])
-for(ii in seq_along(sup)){
-for(k in 1:(z-1)) out[,,k+1,ii] <- f(st = out[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = tmp[[ii]],sdd = sdd,YYN = YYN)
+outSup[,,1,] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(YYN,n),0,0))
+for(ii in seq_along(tmp)) outSup[,1:6,1,ii] <-round(f_suppress(mat = outSup[,1:6,1,ii],sdd=sdd,n = n,sup = tmp[[ii]]) * outSup[,1:6,1,ii])
+for(ii in seq_along(tmp)){
+for(k in 1:(z-1)) outSup[,,k+1,ii] <- f(st = outSup[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = tmp[[ii]],sdd = sdd,YYN = YYN)
 }
-out[,,1,1]
-out[,,100,19]
-out[,,100,]
+outSup[,,1,1]
+outSup[,,100,19]
+outSup[,,100,]
 
-# output
-tots <- apply(out[,1:3,,],c(1,3,4),sum)
+# outSupput
+tots <- apply(outSup[,1:3,,],c(1,3,4),sum)
 tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
 aa <- apply(tots2,2,median)
 range(aa)
 plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,1),type = "l",las = 2)
 axis(1,seq(0,1,.1))
 
-# Stocking
-tmp <- seq(500,7000,100)
+#### One-way Stocking ###
+n <- 500
+z <- 50
+tmp <- seq(500,9000,length.out = 60)
 #
 outStock <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp)) #,"Fn","Mn","YYn","N","Sex"
 dim(out);dimnames(out)
@@ -146,20 +147,56 @@ for(ii in 1:length(tmp)){
   for(k in 1:(z-1)) outStock[,,k+1,ii] <- f(st = outStock[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup,sdd = sdd,YYN = tmp[ii])
 }
 
-outStock[,,100,19]
+outStock[,,2,19]
 # output
 tots <- apply(outStock[,1:3,,],c(1,3,4),sum)
 tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
-aa <- apply(tots2,2,median)
+aa <- apply(tots2,2,median,na.rm = T)
 range(aa)
-plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,1),type = "l",las = 2)
-axis(1,seq(0,1,.1))
-# two-way suppression -- later
-asd <- seq(.1,.9,.1)
-asd <- expand.grid(asd,asd,asd)
-asd <- asplit(asd,1)
+plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,7000),type = "l",las = 2)
+axis(1,seq(0,tmp[length(tmp)],1000))
+
+outStock[1:10,,100,66]
+
+#### two-way suppression -- later ###
+n <- 100
+nn <- 10
+tmpSu <- seq(.05,.95,length.out = nn)
+tmpSt <- round(tmpSu*1e4)
+# tmpSt <- round(seq(500,9000,length.out = nn))
+asd <- expand.grid(tmpSt,tmpSu)
+# asd <- asplit(asd,2)
 nrow(asd)
 # Starting point
-out <- array(0,dim = c(n,9,z,nrow(asd)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z))) #,"Fn","Mn","YYn","N","Sex"
-out[,,1,] <- cbind(stF,stM,stYY)
-for(i in 1:nrow(asd)) out[,1:6,1,i] <-round(f_suppress(mat = out[,1:6,1,i],sdd=sdd,n = n,sup = as.vector(asd[[i]])) * out[,1:6,1,i])
+out2way <- array(0,dim = c(n,9,z,nn**2),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),paste(asd[[1]],asd[[2]],sep = "-"))) #,"Fn","Mn","YYn","N","Sex"
+# laydown first matrices with varying yys
+for(ii in 1:nn**2) out2way[,,1,ii] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(asd[ii,1],n),0,0))
+# suppress T_0 with varying suppression rates
+for(ii in 1:nn**2) out2way[,1:6,1,ii] <-round(f_suppress(mat = out2way[,1:6,1,ii],sdd=sdd,n = n,sup = asd[ii,2]) * out2way[,1:6,1,ii])
+# Make the magic happen
+for(ii in 1:nn**2){
+  for(k in 1:(z-1)) out2way[,,k+1,ii] <- f(st = out2way[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = asd[ii,2],sdd = sdd,YYN = asd[ii,1])
+}
+
+
+
+out2way[,,5,8]
+tots <- apply(out2way[,1:3,,],c(1,3,4),sum)
+tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
+aa <- apply(tots2,2,median,na.rm = T)
+range(aa)
+m <- matrix(names(aa),10,10)
+m <- matrix(aa,10,10)
+m[is.na(m)] <- "NA"
+image(x = tmpSt,y=tmpSu,z = matrix(aa,10,10),las = 2,oldstyle = T,xaxt = "s")
+lapply(1:nn, function(x) text(tmpSt,tmpSu[x],m[,x],cex = .8))
+axis(1,tmpSt,tmpSt)
+
+asd[1,tmpSu,m]
+text(tmpSt,tmpSu,m)
+
+axis(1,tmpSt)
+contour(m,nlevels = 20,drawlabels = F)
+
+plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,7000),type = "l",las = 2)
+axis(1,seq(0,tmp[length(tmp)],1000))
