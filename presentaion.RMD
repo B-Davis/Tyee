@@ -1,0 +1,390 @@
+---
+title: "Feasibility of Using YY-males to Eradicate Brook Trout in Tyee Springs"
+author: '**U.S. Fish and Wildlife Service**<br>**Columbia River Fish and Wildlife
+  Conservation Office** <br> Brian Davis <br> Jen Poirier <br> Julie Harris <br><br>**U.S.
+  Fish and Wildlife Service**<br> **Abernathy Fish Technology Center** <br> Doug Peterson
+  <br> Ron Twibell'
+date: ''
+output:
+  ioslides_presentation:
+    transition: .2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+***
+<center> <h2>Female &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; male</h2> </center>
+
+<center>
+```{r,fig.align='center',fig.height=1.5}
+library(DiagrammeR)
+graph <- grViz("
+digraph boxes_and_circles {
+      
+      # a 'graph' statement
+      graph [overlap = true, fontsize = 10, rankdir = LR]
+      
+      # several 'node' statements
+      node [shape = circle,
+      fontname = Helvetica]
+      A[label = 'XX']; 
+      B[label = 'XY'];
+
+      # several 'edge' statements
+      A -> B [arrowhead = none]
+      }
+      ")
+graph
+```
+<center>
+
+<br>
+
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1)
+plot.new();plot.window(c(0,1),c(0,1))
+```
+
+***
+<center> <h2>Female &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; male</h2> </center>
+
+<center>
+```{r,fig.align='center',fig.height=1.5}
+library(DiagrammeR)
+graph <- grViz("
+digraph boxes_and_circles {
+      
+      # a 'graph' statement
+      graph [overlap = true, fontsize = 10, rankdir = LR]
+      
+      # several 'node' statements
+      node [shape = circle,
+      fontname = Helvetica]
+      A[label = 'XX']; 
+      B[label = 'XY'];
+
+      # several 'edge' statements
+      A -> B [arrowhead = none]
+      }
+      ")
+graph
+```
+<center>
+
+<hr>
+
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1)
+plot.new();plot.window(c(0,1),c(0,1))
+abline(v = .5,h = .5,lty = 2,lwd = 2)
+text(c(.25,.25,.75,.75),c(.25,.75,.25,.75),c("XX","XX","XY","XY"),cex = 4)
+text(c(0,0)-.15,c(.25,.75),"X",cex = 4,xpd = NA)
+text(c(.25,.75),c(1,1)+.18,c("X","Y"),cex = 4,xpd = NA)
+box(lty = 2,lwd = 2)
+```
+
+
+***
+<center> <h2>Female &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; male</h2> </center>
+
+<center>
+```{r,fig.align='center',fig.height=1.5}
+library(DiagrammeR)
+graph <- grViz("
+digraph boxes_and_circles {
+      
+      # a 'graph' statement
+      graph [overlap = true, fontsize = 10, rankdir = LR]
+      
+      # several 'node' statements
+      node [shape = circle,
+      fontname = Helvetica]
+      A[label = 'XX']; 
+      B[label = 'XY'];
+
+      # several 'edge' statements
+      A -> B [arrowhead = none]
+      }
+      ")
+graph
+```
+<center>
+
+<hr>
+
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1)
+plot.new();plot.window(c(0,1),c(0,1))
+polygon(c(.51,1.03,1.03,.51),c(-.03,-.03,.49,.49),col = "grey60",border = F)
+polygon(c(.51,1.03,1.03,.51),c(.51,.51,1.03,1.03),col = "grey60",border = F)
+abline(v = .5,h = .5,lty = 2,lwd = 2)
+text(c(.25,.25,.75,.75),c(.25,.75,.25,.75),c("XX","XX","XY","XY"),cex = 4)
+text(c(0,0)-.15,c(.25,.75),"X",cex = 4,xpd = NA)
+text(c(.25,.75),c(1,1)+.18,c("X","Y"),cex = 4,xpd = NA)
+box(lty = 2,lwd = 2)
+```
+
+***
+<center> <h2>Female &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; male</h2> </center>
+
+<center>
+```{r,fig.align='center',fig.height=1.5}
+library(DiagrammeR)
+graph <- grViz("
+digraph boxes_and_circles {
+      
+      # a 'graph' statement
+      graph [overlap = true, fontsize = 10, rankdir = LR]
+      
+      # several 'node' statements
+      node [shape = circle,
+      fontname = Helvetica]
+      A[label = 'XX']; 
+      B[label = 'YY'];
+
+      # several 'edge' statements
+      A -> B [arrowhead = none]
+      }
+      ")
+graph
+```
+<center>
+
+<hr>
+
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1)
+plot.new();plot.window(c(0,1),c(0,1))
+```
+
+***
+<center> <h2>Female &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; male</h2> </center>
+
+<center>
+```{r,fig.align='center',fig.height=1.5}
+library(DiagrammeR)
+graph <- grViz("
+digraph boxes_and_circles {
+      
+      # a 'graph' statement
+      graph [overlap = true, fontsize = 10, rankdir = LR]
+      
+      # several 'node' statements
+      node [shape = circle,
+      fontname = Helvetica]
+      A[label = 'XX']; 
+      B[label = 'YY'];
+
+      # several 'edge' statements
+      A -> B [arrowhead = none]
+      }
+      ")
+graph
+```
+<center>
+
+<hr>
+
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1)
+plot.new();plot.window(c(0,1),c(0,1))
+abline(v = .5,h = .5,lty = 2,lwd = 2)
+text(c(.25,.25,.75,.75),c(.25,.75,.25,.75),c("XY","XY","XY","XY"),cex = 4)
+text(c(0,0)-.15,c(.25,.75),"X",cex = 4,xpd = NA)
+text(c(.25,.75),c(1,1)+.18,c("Y","Y"),cex = 4,xpd = NA)
+box(lty = 2,lwd = 2)
+```
+
+***
+<center> <h2>Female &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; male</h2> </center>
+
+<center>
+```{r,fig.align='center',fig.height=1.5}
+library(DiagrammeR)
+graph <- grViz("
+digraph boxes_and_circles {
+      
+      # a 'graph' statement
+      graph [overlap = true, fontsize = 10, rankdir = LR]
+      
+      # several 'node' statements
+      node [shape = circle,
+      fontname = Helvetica]
+      A[label = 'XX']; 
+      B[label = 'YY'];
+
+      # several 'edge' statements
+      A -> B [arrowhead = none]
+      }
+      ")
+graph
+```
+<center>
+
+<hr>
+
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1)
+plot.new();plot.window(c(0,1),c(0,1))
+polygon(c(.51,1.03,1.03,.51),c(-.03,-.03,.49,.49),col = "grey60",border = F)
+polygon(c(.51,1.03,1.03,.51),c(.51,.51,1.03,1.03),col = "grey60",border = F)
+polygon(c(-0.3,.49,.49,-0.3),c(-.03,-.03,.49,.49),col = "grey60",border = F)
+polygon(c(-0.3,.49,.49,-0.3),c(.51,.51,1.03,1.03),col = "grey60",border = F)
+abline(v = .5,h = .5,lty = 2,lwd = 2)
+text(c(.25,.25,.75,.75),c(.25,.75,.25,.75),c("XY","XY","XY","XY"),cex = 4)
+text(c(0,0)-.15,c(.25,.75),"X",cex = 4,xpd = NA)
+text(c(.25,.75),c(1,1)+.18,c("Y","Y"),cex = 4,xpd = NA)
+box(lty = 2,lwd = 2)
+```
+
+## Population Crash | Suppress Natural Population + Stock YY Males
+
+```{r,fig.align='center',fig.height=5,fig.width=6}
+par(mar = c(5, 5, 4, 2) + 0.1,bg = NA)
+plot.new();plot.window(c(0,1),c(0,1))
+box(lwd = 2)
+x <- c(0,.1,.3,.5,.8,.91)
+y <- c(.95,.8,.85,.7,.56,-.2)
+# abline(v = seq(0,1,.1),h = seq(0,1,.1),col = "grey50")
+abline(v = seq(0,1,length.out = 10),h = seq(0,1,length.out = 10),col = "grey40")
+lines(x,y,xpd = NA,lwd = 5,col = "red")
+axis(2,c(0,.333333333333333,.6666667,1),c("None","Some","More","Lots"),las = 2)
+axis(1,c(0,.3333333333333,.6666667,1),c("Now","Later","Later","Later"),las = 2)
+arrows(x0 = .8,y0 = .56,x1 = .91,y1 = -.2,xpd = NA,lwd = 5,col = "red")
+title(ylab = "Female Abundance",line = 4)
+title(xlab = "Time",line = 4)
+# title(main = "Population Crash")
+```
+
+
+## Idaho Department of Fish and Game | YY-male Brook Trout Hatchery Broodstock Program
+Why Brook Trout?
+
+- short lived
+- early sexual maturation
+- known genetic sex marker
+- ability to feminize males
+
+## How to Make a YY Male
+
+1. Treat Brook Trout fry with Erstodial for 60 days
+2. Identify fish with male genotype and female phenotype
+<br><br><br>
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1,oma = c(0,2,2,0))
+plot.new();plot.window(c(0,1),c(0,1))
+abline(v = .5,h = .5,lty = 2,lwd = 2)
+text(c(.25,.25,.75,.75),c(.25,.75,.25,.75),c("XY","XX","YY","XY"),cex = 4)
+text(c(0,0)-.15,c(.25,.75),c("Y","X"),cex = 4,xpd = NA)
+text(c(.25,.75),c(1,1)+.18,c("X","Y"),cex = 4,xpd = NA)
+box(lty = 2,lwd = 2)
+mtext("Feminized Male",2,outer = T,cex = 2,col = "grey30")
+mtext("Typical Male",3,outer = T,cex = 2  ,col = "grey30")
+```
+
+## How to Make a YY Male
+
+1. Treat Brook Trout fry with Erstodial for 60 days
+2. Identify fish with male genotype and female phenotype
+<br><br><br>
+```{r}
+par(bg = "NA",mar = c(5, 5, 4, 2) + 0.1,oma = c(0,2,2,0))
+plot.new();plot.window(c(0,1),c(0,1))
+abline(v = .5,h = .5,lty = 2,lwd = 2)
+polygon(c(.51,1.03,1.03,.51),c(-.03,-.03,.49,.49),col = "grey60",border = F)
+polygon(c(.51,1.03,1.03,.51),c(.51,.51,1.03,1.03),col = "grey90",border = F)
+polygon(c(-0.3,.49,.49,-0.3),c(-.03,-.03,.49,.49),col = "grey90",border = F)
+text(c(.25,.25,.75,.75),c(.25,.75,.25,.75),c("XY","XX","YY","XY"),cex = 4)
+text(c(0,0)-.15,c(.25,.75),c("Y","X"),cex = 4,xpd = NA)
+text(c(.25,.75),c(1,1)+.18,c("X","Y"),cex = 4,xpd = NA)
+box(lty = 2,lwd = 2)
+mtext("Feminized Male",2,outer = T,cex = 2,col = "grey30")
+mtext("Typical Male",3,outer = T,cex = 2  ,col = "grey30")
+```
+
+## Carson National Fish Hatchery | Tyee Springs
+
+<div class="columns-2">
+```{r Carson, echo=FALSE, out.width = '56%',out.height='56%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/CarsonNFH2.JPG")
+```
+
+<font size="5">**Why are we concerned about brook trout?**</font>
+<hr>
+
+- Brook Trout population in Hatchery water source
+- Rearing 250,000 Spring Chinook for Walla Walla basin
+- Population tested positive for BKD
+- Invasive species
+</div>
+
+## Carson National Fish Hatchery | Tyee Springs - YY Male Feasibility
+
+<div class="columns-2">
+```{r, echo=FALSE, out.width = '56%',out.height='56%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/CarsonNFH2.JPG")
+```
+<br>
+
+Three Mark-Recapture PIT tagging events 
+
+  - Fall 2018
+  - Spring 2019
+  - Fall 2019
+  
+  Population Metrics
+
+  - Abundance
+  - Annual Survival
+  - Age Structure
+</div>
+
+## Carson National Fish Hatchery | Tyee Springs - Unit 1
+
+<div class="columns-2">
+```{r Carson1, echo=FALSE, out.width = '56%',out.height='56%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/CarsonNFH2Unit1.png")
+```
+
+- Electrofishing Barge
+- 4 passes
+
+```{r, echo=FALSE, out.width = '90%',out.height='90%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/Pictures_E.F._Tyee_Creek/IMG_1562.JPG")
+```
+</div>
+
+## Carson National Fish Hatchery | Tyee Springs - Unit 2
+
+<div class="columns-2">
+```{r Carson2, echo=FALSE, out.width = '56%',out.height='56%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/CarsonNFH2Unit2.png")
+```
+<br>
+
+- Backpack Electrofisher
+- 1 pass
+
+```{r, echo=FALSE, out.width = '70%',out.height='70%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/Unit2.jpg")
+```
+</div>
+
+## Carson National Fish Hatchery | Tyee Springs - Unit 3
+
+<div class="columns-2">
+```{r Carson3, echo=FALSE, out.width = '56%',out.height='56%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/CarsonNFH2Unit3.png")
+```
+<br><br>
+
+- Electrofishing Barge
+- 1 pass
+
+```{r, echo=FALSE, out.width = '100%',out.height='100%',fig.align='center'}
+knitr::include_graphics("C:/Users/brdavis.IFW/Documents/Projects/YYmales/images/IMG_20180801_102658938.jpg")
+```
+</div>
+
