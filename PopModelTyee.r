@@ -3,37 +3,39 @@ source("code/functions.r")
 ### Parameters ###
 ##################
 
-n <- 100 # rows per age class - different threads of stochasticity
+n <- 1000 # rows per age class - different threads of stochasticity
 z <- 100 # number of matrices - years into future
 Sex <- .5 # proportion of females - natural population
 YYS <- .18 # YY survival from age 0 to spawn
 YYN <- 3000
 # YYS0 <- 0
 #
-m <- matrix(c(0,.425,0,1.5,0,.75,2.3,0,.035),ncol = 3) # Male survival matrix
-mM <- matrix(c(0,.425,0,0,0,.75,0,0,.035),ncol = 3) # Male survival matrix
-mF <- matrix(c(0,.425,0,3,0,.75,4.6,0,.035),ncol = 3) # Female
-mYY <- matrix(c(0,.18,0,0,0,.25,0,0,.09),ncol = 3)
-st <- c(3000,2000,1000) # Starting abundance - 0,1,ad
+# m <- matrix(c(0,.425,0,1.5,0,.12,2.3,0,.015),ncol = 3) # Male survival matrix
+# mM <- matrix(c(0,.425,0,0,0,.75,0,0,.035),ncol = 3) # Male survival matrix
+# mF <- matrix(c(0,.425,0,3,0,.75,4.6,0,.035),ncol = 3) # Female
+# mYY <- matrix(c(0,.18,0,0,0,.25,0,0,.09),ncol = 3)
+# st <- c(3000,2000,1000) # Starting abundance - 0,1,ad
 # stF <- matrix(rep(c(3000,2000,1000)/2,n,each = n),n,3)
 # stM <- matrix(rep(c(3000,2000,1000)/2,n,each = n),n,3)
-# # stYY <- cbind(rbinom(n = n,size = YYN,prob = YYS),0,0) # Starting abundance - 0,1,ad
-# stYY <- cbind(rep(YYN,n),0,0) # Starting abundance - 0,1,ad
-ST <- cbind(stF,stM,stYY,NA,NA,NA,NA,NA)
-S <- c(.425,.75,.035,.425,.75,.035,.18,.18,.18)
+# stYY <- cbind(rbinom(n = n,size = YYN,prob = YYS),0,0) # Starting abundance - 0,1,ad
+# # stYY <- cbind(rep(YYN,n),0,0) # Starting abundance - 0,1,ad
+# ST <- cbind(stF,stM,stYY,NA,NA,NA,NA,NA)
+S <- c(.44,.18,.125,.44,.18,.125,.18,.05,.01) # Survival: 0-1,1-ad,ad-ad for females, males and YYs
 SYY <- c(.18,.18,.18)
-Fc <- c(mF[1,])
+st <- c(4020,2744,376) # Starting abundance - 0,1,ad
+Fc <- c(0,2.5,7.2) # Fecundity
 ###################
 ### Suppression ###
 ###################
 # sup <- c(.2,.2,.2)
-sup <- c(.5,.4,.3) # vector == proprtion of fish suppressed, age 0 ,1, and 2
+sup <- c(.5,.5,.5) # vector == proprtion of fish suppressed, age 0 ,1, and 2
 # sup <- c(.3,.5,.4) # vector == proprtion of fish suppressed, age 0 ,1, and 2
 sdd <- .024 # standard deviation of suppression rates
 # sapply(1 - sup,function(x) rbeta(n,beta.mom(x,sdd)[1],beta.mom(x,sdd)[2]))
 CE <- function(x,top = .03,b) (1-exp(-b*x))*top # capture efficiency as a f() of abundance
-SuppressionRateDecay <- .5 # try b = 0.1, .03,.008, .001, and .0005
-# curve(CE(x,top = .3,SuppressionRateDecay),0,1000,lwd = 3)
+SuppressionRateDecay <- .1 # try b = 0.1, .03,.008, .001, and .0005
+curve(CE(x,top = .3,SuppressionRateDecay),0,1000,lwd = 3)
+
 
 
 
@@ -46,8 +48,8 @@ SuppressionRateDecay <- .5 # try b = 0.1, .03,.008, .001, and .0005
 # }
 # f(st,n,S,Fc)
 
-st <- out[,1:9,1]
-YYS <- SYY
+# st <- out[,1:9,1]
+# YYS <- SYY
 
 f <- function(st,n,S,Fc,YYS,sup,sdd,YYN){ # starting pop - n columns - survival rates - Fecundity - YY surv. rates - suppression rates - sd of sup. rates
   # Matrix Math w/ stochasticity & YY male surv from stock to spawn
@@ -96,7 +98,7 @@ dim(out)
 tots <- apply(out[,1:3,],c(1,3),sum)
 erad <- sapply(1:nrow(tots),function(x) which(tots[x,] == 0)[1L]) - 1
 any(is.na(erad)) # if true the z not big enough
-hist(erad)
+hist(erad,breaks = 100)
 median(erad)
 min(erad)
 # barplot(tots,beside = T)
@@ -125,7 +127,8 @@ for(k in 1:(z-1)) outSup[,,k+1,ii] <- f(st = outSup[,,k,ii],n = n,S = S,Fc = Fc,
 outSup[,,1,1]
 outSup[,,100,19]
 outSup[,,100,]
-
+# save(outSup,file = "code/objects/outSup.Rdata")
+load("code/objects/outSup.Rdata")
 # outSupput
 tots <- apply(outSup[,1:3,,],c(1,3,4),sum)
 tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
@@ -134,10 +137,14 @@ range(aa)
 plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,1),type = "l",las = 2)
 axis(1,seq(0,1,.1))
 
+aa
+hist(tots2[,])
+dim(tots2)
+
 #### One-way Stocking ###
 n <- 500
 z <- 50
-tmp <- seq(500,9000,length.out = 60)
+tmp <- round(seq(500,9000,length.out = 60))
 #
 outStock <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp)) #,"Fn","Mn","YYn","N","Sex"
 dim(out);dimnames(out)
@@ -146,8 +153,10 @@ for(ii in seq_along(tmp)) outStock[,1:6,1,ii] <-round(f_suppress(mat = outStock[
 for(ii in 1:length(tmp)){
   for(k in 1:(z-1)) outStock[,,k+1,ii] <- f(st = outStock[,,k,ii],n = n,S = S,Fc = Fc, YYS = SYY,sup = sup,sdd = sdd,YYN = tmp[ii])
 }
-
-outStock[,,2,19]
+outStock[,,2,2]
+outStock[1:10,,100,66]
+# save(outStock,file = "code/objects/outStock.Rdata")
+load("code/objects/outStock.Rdata")
 # output
 tots <- apply(outStock[,1:3,,],c(1,3,4),sum)
 tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
@@ -156,9 +165,54 @@ range(aa)
 plot(as.numeric(names(aa)),aa,xaxt = "n",xlim = c(0,7000),type = "l",las = 2)
 axis(1,seq(0,tmp[length(tmp)],1000))
 
-outStock[1:10,,100,66]
+#### One-way Fecundity Age 1###
+n <- 10
+# tmp <- lapply(1:60,function(x) cbind(0,seq(1.1,5,length.out = 60),seq(3.6,14.2,length.out = 60))[x,])
+tmp <- lapply(1:60,function(x) cbind(0,seq(1.1,5,length.out = 60),7.2)[x,])
+tmp <- lapply(tmp,round,2)
 
-#### two-way suppression -- later ###
+outFec <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp)) #,"Fn","Mn","YYn","N","Sex"
+outFec[,,1,] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(YYN,n),0,0))
+# suppress first matrices
+for(ii in seq_along(tmp)) outFec[,1:6,1,ii] <-round(f_suppress(mat = outFec[,1:6,1,ii],sdd=sdd,n = n,sup = sup) * outFec[,1:6,1,ii])
+# Run it
+for(ii in 1:length(tmp)){
+  for(k in 1:(z-1)) outFec[,,k+1,ii] <- f(st = outFec[,,k,ii],n = n,S = S,Fc = tmp[[ii]], YYS = SYY,sup = sup,sdd = sdd,YYN = YYN)
+}
+
+tots <- apply(outFec[,1:3,,],c(1,3,4),sum)
+tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
+aa <- apply(tots2,2,median,na.rm = T)
+range(aa)
+plot(1:60,aa,xaxt = "n",xlim = c(0,7000),type = "l",las = 2)
+
+dim(outFec)
+outFec[,,10,60]
+
+#### One-way Fecundity Age 2 ###
+n <- 10
+# tmp <- lapply(1:60,function(x) cbind(0,seq(1.1,5,length.out = 60),seq(3.6,14.2,length.out = 60))[x,])
+tmp <- lapply(1:60,function(x) cbind(0,2.5,seq(3.6,14.2,length.out = 60))[x,])
+tmp <- lapply(tmp,round,2)
+
+outFec2 <- array(0,dim = c(n,9,z,length(tmp)),dimnames = list(NULL,c("F0","F1","Fad","M0","M1","Mad","YY0","YY1","YYad"),paste0("T",1:z),tmp)) #,"Fn","Mn","YYn","N","Sex"
+outFec2[,,1,] <- cbind(matrix(rep(st/2,n,each = n),n,3),matrix(rep(st/2,n,each = n),n,3),cbind(rep(YYN,n),0,0))
+# suppress first matrices
+for(ii in seq_along(tmp)) outFec2[,1:6,1,ii] <-round(f_suppress(mat = outFec2[,1:6,1,ii],sdd=sdd,n = n,sup = sup) * outFec2[,1:6,1,ii])
+# Run it
+for(ii in 1:length(tmp)){
+  for(k in 1:(z-1)) outFec2[,,k+1,ii] <- f(st = outFec2[,,k,ii],n = n,S = S,Fc = tmp[[ii]], YYS = SYY,sup = sup,sdd = sdd,YYN = YYN)
+}
+
+tots <- apply(outFec[,1:3,,],c(1,3,4),sum)
+tots2 <- apply(tots,c(1,3),function(x) which(x == 0)[1L]-1)
+aa <- apply(tots2,2,median,na.rm = T)
+range(aa)
+plot(1:60,aa,xaxt = "n",xlim = c(0,7000),type = "l",las = 2)
+
+dim(outFec)
+outFec[,,1,60]
+#### two-way suppression ###
 n <- 100
 nn <- 10
 tmpSu <- seq(.05,.95,length.out = nn)
@@ -188,8 +242,9 @@ range(aa)
 m <- matrix(names(aa),10,10)
 m <- matrix(aa,10,10)
 m[is.na(m)] <- "NA"
-image(x = tmpSt,y=tmpSu,z = matrix(aa,10,10),las = 2,oldstyle = T,xaxt = "s")
+image(x = tmpSt,y=tmpSu,z = matrix(aa,10,10),las = 2,oldstyle = T,yaxt = "n",bty = "n")
 lapply(1:nn, function(x) text(tmpSt,tmpSu[x],m[,x],cex = .8))
+axis(2,seq(0,1,.2),seq(0,100,20),las = 2)
 axis(1,tmpSt,tmpSt)
 
 asd[1,tmpSu,m]
